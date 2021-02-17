@@ -19,7 +19,7 @@ RUN apt-get -y update && apt-get -y upgrade \
     # LLVM
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
     # Python
-    && python3 -m pip install pynvim 'python-language-server[all]' flake8 black pyls-black pyls-isort tqdm numpy matplotlib \
+    && python3 -m pip install pynvim debugpy 'python-language-server[all]' flake8 black pyls-black pyls-isort tqdm numpy matplotlib \
     # svls
     && curl --silent "https://api.github.com/repos/dalance/svls/releases/latest" | grep browser_download_url | grep x86_64-lnx.zip | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.zip -i - && unzip -d /usr/bin tmp.zip && rm -f tmp.zip \
     # Clean-up cache
