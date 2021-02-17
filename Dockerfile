@@ -8,7 +8,7 @@ RUN apt-get -y update && apt-get -y upgrade \
     && add-apt-repository ppa:kelleyk/emacs \
     && apt-get -y update \
     # Utils
-    && apt-get -y install build-essential git \
+    && apt-get -y install build-essential git unzip \
                           wget curl python3-pip ripgrep fd-find fzf htop iftop iotop \
                           emacs27-nox \
                           cmake bear global tmux zsh \
@@ -20,6 +20,8 @@ RUN apt-get -y update && apt-get -y upgrade \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
     # Python
     && python3 -m pip install pynvim 'python-language-server[all]' flake8 black pyls-black pyls-isort tqdm numpy matplotlib \
+    # svls
+    && curl --silent "https://api.github.com/repos/dalance/svls/releases/latest" | grep browser_download_url | grep x86_64-lnx.zip | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.zip -i - && unzip -d /usr/bin tmp.zip && rm -f tmp.zip \
     # Clean-up cache
     && rm -rf /var/lib/apt/lists/*
 
