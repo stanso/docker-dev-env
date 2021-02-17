@@ -14,8 +14,8 @@ RUN apt-get -y update && apt-get -y upgrade \
                           cmake bear global tmux zsh \
                           man-db \
     # Neovim nightly
-    wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage -O /usr/bin/nvim \
-    chmod 755 /usr/bin/nvim \
+    && wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage -O /usr/bin/nvim \
+    && chmod 755 /usr/bin/nvim \
     # LLVM
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
     # Python
