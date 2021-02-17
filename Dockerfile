@@ -28,6 +28,7 @@ RUN apt-get -y update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -u 1000 tssu
+VOLUME /home/tssu
 USER tssu
 CMD ["/bin/zsh"]
 
