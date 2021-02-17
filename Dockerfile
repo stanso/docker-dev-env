@@ -12,6 +12,7 @@ RUN apt-get -y update && apt-get -y upgrade \
                           wget curl python3-pip ripgrep fd-find fzf htop iftop iotop \
                           neovim python3-neovim emacs27-nox \
                           cmake bear global tmux zsh \
+                          man-db \
     # LLVM
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
     # Python
@@ -27,8 +28,9 @@ RUN apt-get -y update \
                           libhdf5-serial-dev python3-pydot libpng-dev libelf-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -u 1000 tssu
+RUN useradd -u 1000 tssu && chsh -s /bin/zsh tssu
 VOLUME /home/tssu
 USER tssu
+WORKDIR /home/tssu
 CMD ["/bin/zsh"]
 
