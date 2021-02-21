@@ -13,7 +13,7 @@ RUN apt-get -y update && apt-get -y upgrade \
     && apt-get -y update \
     # Utils
     && apt-get -y install build-essential git unzip \
-                          wget curl python3-pip ripgrep fd-find fzf htop iftop iotop \
+                          wget curl python3-pip fzf htop iftop iotop \
                           emacs27-nox \
                           cmake bear global tmux zsh \
                           man-db \
@@ -25,6 +25,12 @@ RUN apt-get -y update && apt-get -y upgrade \
     && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
     # Python
     && python3 -m pip install pynvim debugpy 'python-language-server[all]' flake8 black pyls-black pyls-isort tqdm numpy matplotlib \
+    # ripgrep
+    && curl --silent "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep browser_download_url grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb \
+    # fd
+    && curl --silent "https://api.github.com/repos/sharkdp/fd/releases/latest" | grep browser_download_url | grep fd-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb \
+    # bat
+    && curl --silent "https://api.github.com/repos/sharkdp/bat/releases/latest" | grep browser_download_url | grep bat-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb \
     # svls
     && curl --silent "https://api.github.com/repos/dalance/svls/releases/latest" | grep browser_download_url | grep x86_64-lnx.zip | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.zip -i - && unzip -d /usr/bin tmp.zip && rm -f tmp.zip \
     # Clean-up cache
