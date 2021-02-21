@@ -1,6 +1,10 @@
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
+CMD ["/bin/zsh"]
+COPY xterm-24bit.terminfo /root
+RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/xterm-24bit.terminfo
+
 # Repo
 RUN apt-get -y update && apt-get -y upgrade \
     && apt-get -y install lsb-release software-properties-common fuse \
@@ -13,6 +17,7 @@ RUN apt-get -y update && apt-get -y upgrade \
                           emacs27-nox \
                           cmake bear global tmux zsh \
                           man-db \
+                          verilator iverilog \
     # Neovim nightly
     && wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage -O /usr/bin/nvim \
     && chmod 755 /usr/bin/nvim \
@@ -23,7 +28,7 @@ RUN apt-get -y update && apt-get -y upgrade \
     # svls
     && curl --silent "https://api.github.com/repos/dalance/svls/releases/latest" | grep browser_download_url | grep x86_64-lnx.zip | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.zip -i - && unzip -d /usr/bin tmp.zip && rm -f tmp.zip \
     # Clean-up cache
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # For gem5
 RUN apt-get -y update \
@@ -31,11 +36,10 @@ RUN apt-get -y update \
                           libprotobuf-dev protobuf-compiler libprotoc-dev libgoogle-perftools-dev \
                           python3-dev python3-six python-is-python3 doxygen libboost-all-dev \
                           libhdf5-serial-dev python3-pydot libpng-dev libelf-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -u 1000 tssu && chsh -s /bin/zsh tssu
-VOLUME /home/tssu
 USER tssu
 WORKDIR /home/tssu
-CMD ["/bin/zsh"]
+VOLUME /home/tssu
 
