@@ -16,7 +16,7 @@ RUN apt-get -y update && apt-get -y upgrade \
                           wget curl python3-pip fzf htop iftop iotop \
                           emacs27-nox \
                           cmake bear global tmux zsh \
-                          man-db \
+                          man-db libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends\
                           verilator iverilog \
     # Neovim nightly
     && wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage -O /usr/bin/nvim \
@@ -48,4 +48,3 @@ RUN useradd -u 1000 tssu && chsh -s /bin/zsh tssu
 USER tssu
 WORKDIR /home/tssu
 VOLUME /home/tssu
-
