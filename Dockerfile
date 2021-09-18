@@ -32,6 +32,8 @@ RUN dnf install -y scons m4 protobuf protobuf-devel protobuf-compiler zlib zlib-
         # && rm -rf /var/cache/yum
 RUN dnf install -y dtc texinfo
 RUN dnf install -y perl
+RUN dnf install -y autoconf automake python3 libmpc-devel mpfr-devel gmp-devel gawk bison flex texinfo patchutils gcc gcc-c++ zlib-devel expat-devel
+RUN dnf install -y bzip2
 
 COPY xterm-24bit.terminfo /root
 RUN /usr/bin/tic -x -o /usr/share/terminfo /root/xterm-24bit.terminfo && rm -f /root/xterm-24bit.terminfo
