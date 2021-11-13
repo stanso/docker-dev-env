@@ -7,11 +7,11 @@ RUN dnf upgrade -y && dnf install -y dnf-plugins-core
 RUN dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
 RUN dnf upgrade -y \
         && dnf install -y ncurses ncurses-devel \
-                          zsh iproute perl git unzip bzip2 wget curl ripgrep fd-find python3 python3-pip htop iftop iotop \
+                          zsh iproute perl git unzip bzip2 wget curl ripgrep fd-find python3 python3-devel python3-pip htop iftop iotop \
                           neovim emacs \
                           autoconf automake cmake bear global tmux libtool \
                           dtc texinfo \
-                          clang clang-tools-extra \
+                          gcc gcc-c++ clang clang-tools-extra \
                           gh \
         && dnf clean all \
         && rm -rf /var/cache/yum
