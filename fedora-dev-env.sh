@@ -5,6 +5,7 @@ docker run --device /dev/fuse \
            -v dev-opt:/opt \
            -e TERM=$TERM \
            --rm -it \
+           --name fedora-dev-env \
            stanso/fedora-dev-env
 
            # -v ~/Projects/docker-dev-data/home:/home/tssu \
