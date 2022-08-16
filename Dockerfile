@@ -1,7 +1,6 @@
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-CMD ["/bin/zsh"]
 COPY xterm-24bit.terminfo /root
 RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/xterm-24bit.terminfo
 
@@ -12,7 +11,7 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 
 # Repo
 RUN apt-get -y update && apt-get -y upgrade \
-    && apt-get -y install apt-utils lsb-release software-properties-common fuse \
+    && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server \
     # Utils
     && apt-get -y install build-essential git unzip \
                           wget curl python3 python3-pip fzf htop iftop iotop \
@@ -78,7 +77,25 @@ RUN apt-get -y update \
     && apt-get -y install openmpi-bin openmpi-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -u 1000 tssu && chsh -s /bin/zsh tssu
-USER tssu
-WORKDIR /home/tssu
-VOLUME /home/tssu
+# Add user
+RUN useradd -rm -d /home/tssu -s /bin/zsh -u 1000 tssu
+RUN  echo 'tssu:tssu' | chpasswd
+
+# SSHd
+RUN mkdir /var/run/sshd
+WORKDIR /etc/ssh
+RUN /usr/bin/ssh-keygen -A
+RUN ls /etc/ssh -al
+
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
+RUN service ssh --full-restart
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+
+# CMD ["/bin/zsh"]
+# USER tssu
+# WORKDIR /home/tssu
+# VOLUME /home/tssu
+
