@@ -13,7 +13,7 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 RUN apt-get -y update && apt-get -y upgrade \
     && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server sudo \
     # Utils
-    && apt-get -y install build-essential git unzip pkg-config locales \
+    && apt-get -y install build-essential git unzip pkg-config locales man-db \
                           wget curl python3 python3-pip fzf htop iftop iotop \
                           autoconf automake autotools-dev cmake bear global tmux zsh \
                           man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends \
@@ -41,8 +41,14 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
 RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+#Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - \
+    && apt-get -y update \
+    && apt-get -y install nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Python
-RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' black tqdm numpy scipy pandas matplotlib plotly
+RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' black tqdm numpy scipy pandas matplotlib plotly protobuf
 
 # ripgrep
 RUN curl --silent "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep browser_download_url | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
@@ -91,15 +97,17 @@ RUN  echo 'tssu:tssu' | chpasswd
 
 # SSHd
 RUN mkdir /var/run/sshd
-WORKDIR /etc/ssh
+#RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+#RUN sed -i 's|#AuthorizedKeysFile\s*.ssh/authorized_keys\s*.ssh/authorized_keys2|AuthorizedKeysFile  .ssh/authorized_keys .ssh/authorized_keys2|' /etc/ssh/sshd_config
+#RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+#RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
 # RUN /usr/bin/ssh-keygen -A
-# RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-# RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
 RUN service ssh --full-restart
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
+#CMD ["/usr/sbin/sshd", "-D", "-d"]
 
 # CMD ["/bin/zsh"]
 # USER tssu
