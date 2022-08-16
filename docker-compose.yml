@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  tailscale:
+    hostname: ubuntu-dev-env                    # This will become the tailscale device name
+    image: tailscale/tailscale:stable
+    volumes:
+      - "./tailscale_var_lib:/var/lib"        # State data will be stored in this directory
+      - "/dev/net/tun:/dev/net/tun"           # Required for tailscale to work
+    cap_add:                                    # Required for tailscale to work
+      - net_admin
+      - sys_module
+    command: tailscaled
+
+  dev-env-container:
+    image: stanso/ubuntu-dev-env:latest         # Your image goes here
+    network_mode: service:tailscale
+    devices:
+      - "/dev/fuse"
+    cap_add:
+      - SYS_ADMIN
+    environment:
+      TERM: "${TERM}"
+    volumes:
+      - "./ubuntu-data/home:/home/tssu"
+      - "./ubuntu-data/opt:/opt"
+
