@@ -86,17 +86,16 @@ RUN apt-get -y update \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add user
-RUN useradd -rm -d /home/tssu -s /bin/zsh -u 1000 tssu
+RUN useradd -rm -d /home/tssu -s /bin/zsh -g root -G sudo -u 1000 tssu
 RUN  echo 'tssu:tssu' | chpasswd
 
 # SSHd
 RUN mkdir /var/run/sshd
 WORKDIR /etc/ssh
-RUN /usr/bin/ssh-keygen -A
-RUN ls /etc/ssh -al
 
-RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+# RUN /usr/bin/ssh-keygen -A
+# RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+# RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
 RUN service ssh --full-restart
 EXPOSE 22
