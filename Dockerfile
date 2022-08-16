@@ -12,14 +12,10 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 
 # Repo
 RUN apt-get -y update && apt-get -y upgrade \
-    && apt-get -y install lsb-release software-properties-common fuse \
-    # PPAs
-    && add-apt-repository ppa:kelleyk/emacs \
-    && apt-get -y update \
+    && apt-get -y install apt-utils lsb-release software-properties-common fuse \
     # Utils
     && apt-get -y install build-essential git unzip \
                           wget curl python3 python3-pip fzf htop iftop iotop \
-                          emacs27-nox \
                           autoconf automake autotools-dev cmake bear global tmux zsh \
                           man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends\
                           verilator iverilog \
@@ -27,24 +23,41 @@ RUN apt-get -y update && apt-get -y upgrade \
     # Clean-up cache
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Neovim nightly
-RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim.appimage -O /usr/bin/nvim \
-    && chmod 755 /usr/bin/nvim
+# Github commnadline
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt-get -y update \
+    && apt-get -y install gh \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# LLVM
+RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Python
-RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' flake8 black pyls-black pyls-isort tqdm numpy matplotlib
+RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' black tqdm numpy scipy pandas matplotlib plotly
 
 # ripgrep
 RUN curl --silent "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep browser_download_url | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
 
 # fd
-run curl --silent "https://api.github.com/repos/sharkdp/fd/releases/latest" | grep browser_download_url | grep fd-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
+RUN curl --silent "https://api.github.com/repos/sharkdp/fd/releases/latest" | grep browser_download_url | grep fd-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
 
 # bat
-RUN curl --silent "https://api.github.com/repos/sharkdp/bat/releases/latest" | grep browser_download_url | grep bat-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
+# RUN curl --silent "https://api.github.com/repos/sharkdp/bat/releases/latest" | grep browser_download_url | grep bat-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
 
 # svls
 # RUN curl --silent "https://api.github.com/repos/dalance/svls/releases/latest" | grep browser_download_url | grep x86_64-lnx.zip | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.zip -i - && unzip -d /usr/bin tmp.zip && rm -f tmp.zip
+
+# PPAs
+RUN add-apt-repository ppa:kelleyk/emacs \
+    && apt-get -y update \
+    && apt-get -y install emacs28-nativecomp \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Neovim
+RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim.appimage -O /usr/bin/nvim \
+    && chmod 755 /usr/bin/nvim
 
 # For gem5
 RUN apt-get -y update \
@@ -60,17 +73,10 @@ RUN apt-get -y update \
                           autoconf automake autotools-dev curl python3 libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev \ 
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# LLVM
-RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
+# For SST
+RUN apt-get -y update \
+    && apt-get -y install openmpi-bin openmpi-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Github commnadline
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-    && apt-get -y update \
-    && apt-get -y install gh \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 
 RUN useradd -u 1000 tssu && chsh -s /bin/zsh tssu
 USER tssu
