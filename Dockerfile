@@ -11,16 +11,24 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 
 # Repo
 RUN apt-get -y update && apt-get -y upgrade \
-    && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server \
+    && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server sudo \
     # Utils
-    && apt-get -y install build-essential git unzip \
+    && apt-get -y install build-essential git unzip pkg-config locales \
                           wget curl python3 python3-pip fzf htop iftop iotop \
                           autoconf automake autotools-dev cmake bear global tmux zsh \
-                          man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends\
+                          man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends \
+                          libprotobuf-dev protobuf-compiler libprotoc-dev libncurses-dev libssl-dev \
                           verilator iverilog \
                           device-tree-compiler graphviz \
     # Clean-up cache
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# For Mosh
+RUN git clone https://github.com/mobile-shell/mosh.git /tmp/mosh \
+    && cd /tmp/mosh \
+    && ./autogen.sh && ./configure && make && make install \
+    && cd /root && rm -rf /tmp/mosh
+RUN locale-gen en_US.UTF-8
 
 # Github commnadline
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -61,7 +69,7 @@ RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 # For gem5
 RUN apt-get -y update \
     && apt-get -y install build-essential git m4 scons zlib1g zlib1g-dev \
-                          libprotobuf-dev protobuf-compiler libprotoc-dev libgoogle-perftools-dev \
+                          libgoogle-perftools-dev \
                           python3-dev python3-six python-is-python3 doxygen libboost-all-dev \
                           libhdf5-serial-dev python3-pydot libpng-dev libelf-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
