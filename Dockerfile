@@ -13,7 +13,7 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 RUN apt-get -y update && apt-get -y upgrade \
     && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server sudo \
     # Utils
-    && apt-get -y install build-essential git unzip pkg-config locales man-db iproute2 \
+    && apt-get -y install build-essential git unzip pkg-config locales man-db iproute2 iputils-ping net-tools \
                           wget curl python3 python3-pip fzf htop iftop iotop \
                           autoconf automake autotools-dev cmake bear global tmux zsh \
                           man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends \
