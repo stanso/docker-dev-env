@@ -1,5 +1,6 @@
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
+ARG TARGETPLATFORM
 
 COPY xterm-24bit.terminfo /root
 RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/xterm-24bit.terminfo
@@ -51,10 +52,12 @@ RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
 RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' black tqdm numpy scipy pandas matplotlib plotly protobuf
 
 # ripgrep
-RUN curl --silent "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep browser_download_url | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=x86_64; elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCHITECTURE=arm; elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then ARCHITECTURE=aarch64; else ARCHITECTURE=x86_64; fi \
+    && curl --silent "https://api.github.com/repos/microsoft/ripgrep-prebuilt/releases/latest" | grep browser_download_url | grep ${ARCHITECTURE}-unknown-linux-musl.tar.gz | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.tar.gz -i - && tar xf tmp.tar.gz -C /usr/bin && rm -f tmp.tar.gz
 
 # fd
-RUN curl --silent "https://api.github.com/repos/sharkdp/fd/releases/latest" | grep browser_download_url | grep fd-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=amd64; elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCHITECTURE=arm; elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then ARCHITECTURE=arm64; else ARCHITECTURE=amd64; fi \
+    && curl --silent "https://api.github.com/repos/sharkdp/fd/releases/latest" | grep browser_download_url | grep fd_ | grep _${ARCHITECTURE}.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
 
 # bat
 # RUN curl --silent "https://api.github.com/repos/sharkdp/bat/releases/latest" | grep browser_download_url | grep bat-musl_ | grep _amd64.deb | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.deb -i - && dpkg -i tmp.deb && rm -f tmp.deb
