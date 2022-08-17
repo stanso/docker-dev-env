@@ -13,7 +13,7 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 RUN apt-get -y update && apt-get -y upgrade \
     && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server sudo \
     # Utils
-    && apt-get -y install build-essential git unzip pkg-config locales man-db \
+    && apt-get -y install build-essential git unzip pkg-config locales man-db iproute2 \
                           wget curl python3 python3-pip fzf htop iftop iotop \
                           autoconf automake autotools-dev cmake bear global tmux zsh \
                           man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends \
@@ -42,10 +42,10 @@ RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - \
-    && apt-get -y update \
-    && apt-get -y install nodejs \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+#RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
+#    && apt-get -y update \
+#    && apt-get -y install nodejs \
+#    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Python
 RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' black tqdm numpy scipy pandas matplotlib plotly protobuf
@@ -96,7 +96,7 @@ RUN useradd -rm -d /home/tssu -s /bin/zsh -g root -G sudo -u 1000 tssu
 RUN  echo 'tssu:tssu' | chpasswd
 
 # SSHd
-RUN mkdir /var/run/sshd
+#RUN mkdir /var/run/sshd
 #RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 #RUN sed -i 's|#AuthorizedKeysFile\s*.ssh/authorized_keys\s*.ssh/authorized_keys2|AuthorizedKeysFile  .ssh/authorized_keys .ssh/authorized_keys2|' /etc/ssh/sshd_config
 #RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
@@ -104,13 +104,13 @@ RUN mkdir /var/run/sshd
 
 # RUN /usr/bin/ssh-keygen -A
 
-RUN service ssh --full-restart
+RUN service ssh start
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
 #CMD ["/usr/sbin/sshd", "-D", "-d"]
 
-# CMD ["/bin/zsh"]
-# USER tssu
-# WORKDIR /home/tssu
-# VOLUME /home/tssu
+#CMD ["/bin/zsh"]
+#USER tssu
+#WORKDIR /home/tssu
+#VOLUME /home/tssu
 
