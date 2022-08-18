@@ -24,6 +24,12 @@ RUN apt-get -y update && apt-get -y upgrade \
     # Clean-up cache
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Cross compilers
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=aarch64; elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCHITECTURE=x86-64; elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then ARCHITECTURE=x86-64; else ARCHITECTURE=aarch64; fi \
+    && apt-get -y update \
+    && apt-get -y install gcc-${ARCHITECTURE}-linux-gnu \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # For Mosh
 RUN git clone https://github.com/mobile-shell/mosh.git /tmp/mosh \
     && cd /tmp/mosh \
@@ -66,14 +72,11 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=amd64; elif [ "$
 # RUN curl --silent "https://api.github.com/repos/dalance/svls/releases/latest" | grep browser_download_url | grep x86_64-lnx.zip | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.zip -i - && unzip -d /usr/bin tmp.zip && rm -f tmp.zip
 
 # PPAs
-RUN add-apt-repository ppa:kelleyk/emacs \
+RUN add-apt-repository -y ppa:kelleyk/emacs \
+    && add-apt-repository -y ppa:neovim-ppa/stable \
     && apt-get -y update \
-    && apt-get -y install emacs28-nativecomp \
+    && apt-get -y install neovim emacs28-nativecomp \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Neovim
-RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim.appimage -O /usr/bin/nvim \
-    && chmod 755 /usr/bin/nvim
 
 # For gem5
 RUN apt-get -y update \
