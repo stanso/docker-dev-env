@@ -19,8 +19,12 @@ services:
     cap_add:
       - SYS_ADMIN
     environment:
-      TERM: "${TERM}"
+      - TERM=${TERM}
+      - TZ=America/Chicago
+      - HOST_USER=${USER}
+      - HOST_UID=${UID}
+      - HOST_GID=${GID}
     volumes:
-      - "./ubuntu-data/home:/home/tssu"
+      - "./ubuntu-data/home:/home/${USER}"
       - "./ubuntu-data/opt:/opt"
 

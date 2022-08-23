@@ -1,6 +1,11 @@
 FROM ubuntu:20.04
-ENV DEBIAN_FRONTEND=noninteractive
 ARG TARGETPLATFORM
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+ENV HOST_USER=user
+ENV HOST_UID=1000
+ENV HOST_GID=1000
 
 COPY xterm-24bit.terminfo /root
 RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/xterm-24bit.terminfo
@@ -12,9 +17,10 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 
 # Repo
 RUN apt-get -y update && apt-get -y upgrade \
-    && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server sudo \
+    && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server sudo tzdata \
     # Utils
     && apt-get -y install build-essential git unzip pkg-config locales man-db iproute2 iputils-ping net-tools \
+                          linux-tools-generic gdb \
                           wget curl python3 python3-pip fzf htop iftop iotop \
                           autoconf automake autotools-dev cmake bear global tmux zsh \
                           man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends \
@@ -98,8 +104,8 @@ RUN apt-get -y update \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add user
-RUN useradd -rm -d /home/tssu -s /bin/zsh -g root -G sudo -u 1000 tssu
-RUN  echo 'tssu:tssu' | chpasswd
+#RUN useradd -rm -d /home/tssu -s /bin/zsh -g root -G sudo -u 1000 tssu
+#RUN echo 'tssu:tssu' | chpasswd
 
 # SSHd
 #RUN mkdir /var/run/sshd
@@ -112,7 +118,9 @@ RUN  echo 'tssu:tssu' | chpasswd
 
 RUN service ssh start
 EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/bin/bash", "-c", "env && { id -u ${HOST_USER} &>/dev/null || useradd -rm -d /home/${HOST_USER} -s /bin/zsh -g root -G sudo -u ${HOST_UID} ${HOST_USER} ; } && { id -u ${HOST_USER} &>/dev/null || echo ${HOST_USER}':'${HOST_USER} | chpasswd ; } && /usr/sbin/sshd -D"]
+
+#CMD ["/usr/sbin/sshd", "-D"]
 #CMD ["/usr/sbin/sshd", "-D", "-d"]
 
 #CMD ["/bin/zsh"]
