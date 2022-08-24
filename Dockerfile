@@ -118,7 +118,7 @@ RUN apt-get -y update \
 
 RUN service ssh start
 EXPOSE 22
-CMD ["/bin/bash", "-c", "env && { id -u ${HOST_USER} &>/dev/null || useradd -rm -d /home/${HOST_USER} -s /bin/zsh -g root -G sudo -u ${HOST_UID} ${HOST_USER} ; } && { id -u ${HOST_USER} &>/dev/null || echo ${HOST_USER}':'${HOST_USER} | chpasswd ; } && /usr/sbin/sshd -D"]
+CMD ["/bin/bash", "-c", "env && { id -u ${HOST_USER} &>/dev/null || { useradd -rm -d /home/${HOST_USER} -s /bin/zsh -g root -G sudo -u ${HOST_UID} ${HOST_USER} ; } && { echo ${HOST_USER}':'${HOST_USER} | chpasswd ; } ; } && /usr/sbin/sshd -D"]
 
 #CMD ["/usr/sbin/sshd", "-D"]
 #CMD ["/usr/sbin/sshd", "-D", "-d"]
