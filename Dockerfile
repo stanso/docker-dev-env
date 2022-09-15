@@ -67,7 +67,7 @@ RUN cd /tmp && wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.s
 RUN apt-get -y update \
     && apt-get -y install libfmt-dev libspdlog-dev nlohmann-json3-dev libgrpc++-dev protobuf-compiler-grpc libssl-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && cd /tmp && curl --silent "https://api.github.com/repos/rizsotto/bear/releases/latest" | grep tarball_url | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.tar.gz -i - && mkdir -p tmp && tar xf tmp.tar.gz --strip-components 1 -C tmp && rm -f tmp.tar.gz && cd tmp && cmake -DENABLE_UNIT_TESTS=OFF -DENABLE_FUNC_TESTS=OFF . && make all -j8 && make install && cd .. && rm -rf tmp && cd
+    && cd /tmp && curl --silent "https://api.github.com/repos/rizsotto/bear/releases/latest" | grep tarball_url | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.tar.gz -i - && mkdir -p tmp && tar xf tmp.tar.gz --strip-components 1 -C tmp && rm -f tmp.tar.gz && cd tmp && cmake -DENABLE_UNIT_TESTS=OFF -DENABLE_FUNC_TESTS=OFF --parallel 4 . && make all -j8 && make install && cd .. && rm -rf tmp && cd
 
 #Node.js
 #RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
