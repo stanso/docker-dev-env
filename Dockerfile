@@ -15,6 +15,9 @@ RUN /usr/bin/tic -x -o /lib/terminfo /root/xterm-24bit.terminfo && rm -f /root/x
 # RUN sed --in-place --regexp-extended "s/(\/\/)(archive\.ubuntu)/\1sg.\2/" /etc/apt/sources.list && \
 #         apt-get update && apt-get upgrade --yes 
 
+RUN yes | unminimize \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Repo
 RUN apt-get -y update && apt-get -y upgrade \
     && apt-get -y install apt-utils lsb-release software-properties-common fuse openssh-server sudo tzdata \
@@ -22,7 +25,8 @@ RUN apt-get -y update && apt-get -y upgrade \
     && apt-get -y install build-essential git unzip pkg-config locales man-db iproute2 iputils-ping net-tools \
                           linux-tools-generic gdb \
                           wget curl python3 python3-pip fzf htop iftop iotop \
-                          autoconf automake autotools-dev cmake bear global tmux zsh \
+                          autoconf automake autotools-dev cmake global tmux zsh \
+                          valgrind valgrind-mpi \
                           man-db pandoc libvterm-dev libvterm-bin libtool libtool-bin gvfs-fuse gvfs-backends \
                           libprotobuf-dev protobuf-compiler libprotoc-dev libncurses-dev libssl-dev \
                           verilator iverilog \
@@ -35,6 +39,9 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=aarch64; elif [ 
     && apt-get -y update \
     && apt-get -y install gcc-${ARCHITECTURE}-linux-gnu \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# chezmoi
+RUN sh -c "$(curl -fsLS https://chezmoi.io/get)" -- -b /usr/bin
 
 # For Mosh
 RUN git clone https://github.com/mobile-shell/mosh.git /tmp/mosh \
@@ -51,8 +58,16 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # LLVM
-RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
+RUN cd /tmp && wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 14 all && rm -f llvm.sh && cd \
+    && apt-get -y update \
+    && apt-get -y install clang-14 clang-tools-14 clangd-14 clang-format-14 clang-tidy-14 lldb-14 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Bear
+RUN apt-get -y update \
+    && apt-get -y install libfmt-dev libspdlog-dev nlohmann-json3-dev libgrpc++-dev protobuf-compiler-grpc libssl-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && cd /tmp && curl --silent "https://api.github.com/repos/rizsotto/bear/releases/latest" | grep tarball_url | sed -E 's/.*"([^"]+)".*/\1/' | wget -q -O tmp.tar.gz -i - && mkdir -p tmp && tar xf tmp.tar.gz --strip-components 1 -C tmp && rm -f tmp.tar.gz && cd tmp && cmake -DENABLE_UNIT_TESTS=OFF -DENABLE_FUNC_TESTS=OFF . && make all -j8 && make install && cd .. && rm -rf tmp && cd
 
 #Node.js
 #RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
@@ -61,7 +76,7 @@ RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
 #    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Python
-RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' black tqdm numpy scipy pandas matplotlib plotly protobuf
+RUN python3 -m pip install pynvim debugpy 'python-lsp-server[all]' black tqdm numpy scipy pandas matplotlib plotly protobuf bitstring scons
 
 # ripgrep
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=x86_64; elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCHITECTURE=arm; elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then ARCHITECTURE=aarch64; else ARCHITECTURE=x86_64; fi \
@@ -103,28 +118,8 @@ RUN apt-get -y update \
     && apt-get -y install openmpi-bin openmpi-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Add user
-#RUN useradd -rm -d /home/tssu -s /bin/zsh -g root -G sudo -u 1000 tssu
-#RUN echo 'tssu:tssu' | chpasswd
-
-# SSHd
-#RUN mkdir /var/run/sshd
-#RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
-#RUN sed -i 's|#AuthorizedKeysFile\s*.ssh/authorized_keys\s*.ssh/authorized_keys2|AuthorizedKeysFile  .ssh/authorized_keys .ssh/authorized_keys2|' /etc/ssh/sshd_config
-#RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-#RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
-# RUN /usr/bin/ssh-keygen -A
 
 RUN service ssh start
 EXPOSE 22
 CMD ["/bin/bash", "-c", "env && { id -u ${HOST_USER} &>/dev/null || { useradd -rm -d /home/${HOST_USER} -s /bin/zsh -g root -G sudo -u ${HOST_UID} ${HOST_USER} ; } && { echo ${HOST_USER}':'${HOST_USER} | chpasswd ; } ; } && /usr/sbin/sshd -D"]
-
-#CMD ["/usr/sbin/sshd", "-D"]
-#CMD ["/usr/sbin/sshd", "-D", "-d"]
-
-#CMD ["/bin/zsh"]
-#USER tssu
-#WORKDIR /home/tssu
-#VOLUME /home/tssu
 
