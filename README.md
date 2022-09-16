@@ -1,5 +1,7 @@
 # README
 
+- `docker pull stanso/ubuntu-dev-env`
+
 - `UID=$(id -u) GID=$(id -g) docker compose up`
 - `UID=$(id -u) GID=$(id -g) docker compose start`
 - `docker compose down` for cleanup

@@ -10,7 +10,7 @@ services:
       - SYS_ADMIN
       - NET_ADMIN
       - SYS_MODULE
-    command: tailscaled --state=tailscaled.state
+    command: tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/var/run/tailscale/tailscaled.sock
 
   dev-env-container:
     image: stanso/ubuntu-dev-env:latest                # Your image goes here
