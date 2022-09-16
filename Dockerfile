@@ -58,7 +58,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # LLVM
-RUN cd /tmp && wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 14 all && rm -f llvm.sh && cd \
+RUN cd /tmp && wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 14 && rm -f llvm.sh && cd \
     && apt-get -y update \
     && apt-get -y install clang-14 clang-tools-14 clangd-14 clang-format-14 clang-tidy-14 lldb-14 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
